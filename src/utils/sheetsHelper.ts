@@ -17,16 +17,18 @@ export const fetchSheetData = async () => {
 };
 
 export const findMatchingAnswer = (userInput: string, sheetData: any[]) => {
-  const words = userInput.toLowerCase().split(' ');
+  if (!userInput || !sheetData) return null;
+
   let bestMatch = { row: null, matchCount: 0 };
 
-  sheetData.forEach((row: any, index: number) => {
-    if (index === 0) return; // Skip header row
+  sheetData.forEach((row: any) => {
+    if (!row.c) return;
     
     let matchCount = 0;
-    for (let i = 1; i <= 5; i++) { // Columns B to F (indexes 1-5)
-      const cellValue = row.c[i]?.v?.toLowerCase() || '';
-      if (words.some(word => cellValue.includes(word))) {
+    // 檢查 B 到 F 欄位（索引 1-5）的關鍵字
+    for (let i = 1; i <= 5; i++) {
+      const cellValue = row.c[i]?.v || '';
+      if (cellValue && userInput.includes(cellValue)) {
         matchCount++;
       }
     }
@@ -39,7 +41,7 @@ export const findMatchingAnswer = (userInput: string, sheetData: any[]) => {
     }
   });
 
-  if (bestMatch.matchCount >= 1) {
+  if (bestMatch.matchCount > 0) {
     return {
       answer: bestMatch.row.c[6]?.v, // Column G
       details: bestMatch.row.c[7]?.v // Column H
