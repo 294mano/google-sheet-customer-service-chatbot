@@ -19,17 +19,23 @@ export const fetchSheetData = async () => {
 
 export const saveUnansweredQuestion = async (question: string) => {
   try {
+    console.log('Attempting to save unanswered question:', question);
+    
     const timestamp = new Date().toLocaleString('zh-TW', { 
       timeZone: 'Asia/Taipei' 
     });
+    
+    console.log('Generated timestamp:', timestamp);
     
     const formData = new FormData();
     formData.append('sheet_name', TRAINING_BOT_WORKSHEET);
     formData.append('timestamp', timestamp);
     formData.append('question', question);
     
+    console.log('Sending request to Google Apps Script...');
+    
     const response = await fetch(
-      `https://script.google.com/macros/s/YOUR_GOOGLE_APPS_SCRIPT_ID/exec`,
+      `https://script.google.com/macros/s/AKfycbzUHODGn9kJ9YjO5H9TsFYZV9ZzQEv8sweQD8v-PA/exec`,
       {
         method: 'POST',
         body: formData
@@ -37,9 +43,12 @@ export const saveUnansweredQuestion = async (question: string) => {
     );
     
     if (!response.ok) {
+      console.error('Failed to save question. Status:', response.status);
+      console.error('Response:', await response.text());
       throw new Error('Failed to save unanswered question');
     }
     
+    console.log('Successfully saved unanswered question');
     return true;
   } catch (error) {
     console.error('Error saving unanswered question:', error);
@@ -85,6 +94,8 @@ export const findMatchingAnswer = (userInput: string, sheetData: any[]) => {
 // Function to check and copy completed training data to k-base
 export const checkAndCopyTrainingData = async () => {
   try {
+    console.log('Checking for completed training data...');
+    
     const response = await fetch(
       `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${TRAINING_BOT_WORKSHEET}`
     );
@@ -96,17 +107,26 @@ export const checkAndCopyTrainingData = async () => {
       row.c[9]?.v === 'done' // Column J has 'done'
     );
     
+    console.log('Found completed rows:', completedRows.length);
+    
     if (completedRows.length > 0) {
       const formData = new FormData();
       formData.append('completed_rows', JSON.stringify(completedRows));
       
-      await fetch(
-        `https://script.google.com/macros/s/YOUR_GOOGLE_APPS_SCRIPT_ID/exec`,
+      const response = await fetch(
+        `https://script.google.com/macros/s/AKfycbzUHODGn9kJ9YjO5H9TsFYZV9ZzQEv8sweQD8v-PA/exec`,
         {
           method: 'POST',
           body: formData
         }
       );
+      
+      if (!response.ok) {
+        console.error('Failed to copy training data. Status:', response.status);
+        throw new Error('Failed to copy training data');
+      }
+      
+      console.log('Successfully copied training data');
     }
   } catch (error) {
     console.error('Error copying training data:', error);
