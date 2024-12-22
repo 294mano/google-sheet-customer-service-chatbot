@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ChatMessage from '@/components/ChatMessage';
 import ChatInput from '@/components/ChatInput';
 import ChatOption from '@/components/ChatOption';
-import { fetchSheetData, findMatchingAnswer } from '@/utils/sheetsHelper';
+import { fetchSheetData, findMatchingAnswer, saveUnansweredQuestion, checkAndCopyTrainingData } from '@/utils/sheetsHelper';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Home } from 'lucide-react';
@@ -38,6 +38,10 @@ const Index = () => {
     };
 
     initChat();
+    
+    // Check for completed training data periodically
+    const interval = setInterval(checkAndCopyTrainingData, 300000); // Every 5 minutes
+    return () => clearInterval(interval);
   }, []);
 
   const handleSendMessage = async (text: string) => {
@@ -53,6 +57,9 @@ const Index = () => {
         }
       ]);
     } else {
+      // Save unanswered question to training_bot sheet
+      await saveUnansweredQuestion(text);
+      
       setMessages(prev => [
         ...prev,
         { 
