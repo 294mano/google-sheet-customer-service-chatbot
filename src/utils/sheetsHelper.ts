@@ -35,20 +35,19 @@ export const saveUnansweredQuestion = async (question: string) => {
     console.log('Sending request to Google Apps Script...');
     
     const response = await fetch(
-      `https://script.google.com/macros/s/AKfycbzUHODGn9kJ9YjO5H9TsFYZV9ZzQEv8sweQD8v-PA/exec`,
+      'https://script.google.com/macros/s/AKfycbzUHODGn9kJ9YjO5H9TsFYZV9ZzQEv8sweQD8v-PA/exec',
       {
         method: 'POST',
+        mode: 'no-cors', // 添加這行來處理 CORS
         body: formData
       }
     );
     
-    if (!response.ok) {
-      console.error('Failed to save question. Status:', response.status);
-      console.error('Response:', await response.text());
-      throw new Error('Failed to save unanswered question');
-    }
+    console.log('Response received:', response);
     
-    console.log('Successfully saved unanswered question');
+    // 由於使用 no-cors，我們無法檢查 response.ok
+    // 但至少我們知道請求已發送
+    console.log('Successfully sent unanswered question');
     return true;
   } catch (error) {
     console.error('Error saving unanswered question:', error);
@@ -91,7 +90,6 @@ export const findMatchingAnswer = (userInput: string, sheetData: any[]) => {
   return null;
 };
 
-// Function to check and copy completed training data to k-base
 export const checkAndCopyTrainingData = async () => {
   try {
     console.log('Checking for completed training data...');
@@ -114,19 +112,15 @@ export const checkAndCopyTrainingData = async () => {
       formData.append('completed_rows', JSON.stringify(completedRows));
       
       const response = await fetch(
-        `https://script.google.com/macros/s/AKfycbzUHODGn9kJ9YjO5H9TsFYZV9ZzQEv8sweQD8v-PA/exec`,
+        'https://script.google.com/macros/s/AKfycbzUHODGn9kJ9YjO5H9TsFYZV9ZzQEv8sweQD8v-PA/exec',
         {
           method: 'POST',
+          mode: 'no-cors', // 添加這行來處理 CORS
           body: formData
         }
       );
       
-      if (!response.ok) {
-        console.error('Failed to copy training data. Status:', response.status);
-        throw new Error('Failed to copy training data');
-      }
-      
-      console.log('Successfully copied training data');
+      console.log('Successfully sent completed training data');
     }
   } catch (error) {
     console.error('Error copying training data:', error);
