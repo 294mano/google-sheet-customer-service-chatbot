@@ -1,6 +1,7 @@
 const SHEET_ID = '1PlHr1jfajCDJVF-QyFRV8Y4bBIWYj91UjVywZaClUEY';
 const WORKSHEET_NAME = 'k-base';
 const TRAINING_BOT_WORKSHEET = 'training_bot';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby48-PHZv_l5oDf6onI1a7LDpeGJB6kcqM56cGjptVr3z82deUiTKpjxjVfEb6a4SNd/exec';
 
 export const fetchSheetData = async () => {
   try {
@@ -34,18 +35,11 @@ export const saveUnansweredQuestion = async (question: string) => {
     
     console.log('Sending request to Google Apps Script...');
     
-    // 更新為新的 Google Apps Script URL
-    const response = await fetch(
-      'https://script.google.com/macros/s/AKfycbwV8sweQD8v-PA/exec',
-      {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: formData
-      }
-    );
+    const response = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: formData
+    });
     
     console.log('Response received:', response);
     console.log('Successfully sent unanswered question');
@@ -111,17 +105,11 @@ export const checkAndCopyTrainingData = async () => {
       const formData = new FormData();
       formData.append('completed_rows', JSON.stringify(completedRows));
       
-      await fetch(
-        'https://script.google.com/macros/s/AKfycbwV8sweQD8v-PA/exec',
-        {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: formData
-        }
-      );
+      await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: formData
+      });
       
       console.log('Successfully sent completed training data');
     }
