@@ -34,19 +34,20 @@ export const saveUnansweredQuestion = async (question: string) => {
     
     console.log('Sending request to Google Apps Script...');
     
+    // 更新為新的 Google Apps Script URL
     const response = await fetch(
-      'https://script.google.com/macros/s/AKfycbzUHODGn9kJ9YjO5H9TsFYZV9ZzQEv8sweQD8v-PA/exec',
+      'https://script.google.com/macros/s/AKfycbwV8sweQD8v-PA/exec',
       {
         method: 'POST',
-        mode: 'no-cors', // 添加這行來處理 CORS
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
         body: formData
       }
     );
     
     console.log('Response received:', response);
-    
-    // 由於使用 no-cors，我們無法檢查 response.ok
-    // 但至少我們知道請求已發送
     console.log('Successfully sent unanswered question');
     return true;
   } catch (error) {
@@ -64,7 +65,6 @@ export const findMatchingAnswer = (userInput: string, sheetData: any[]) => {
     if (!row.c) return;
     
     let matchCount = 0;
-    // 檢查 B 到 F 欄位（索引 1-5）的關鍵字
     for (let i = 1; i <= 5; i++) {
       const cellValue = row.c[i]?.v || '';
       if (cellValue && userInput.includes(cellValue)) {
@@ -82,8 +82,8 @@ export const findMatchingAnswer = (userInput: string, sheetData: any[]) => {
 
   if (bestMatch.matchCount > 0) {
     return {
-      answer: bestMatch.row.c[6]?.v, // Column G
-      details: bestMatch.row.c[7]?.v // Column H
+      answer: bestMatch.row.c[6]?.v,
+      details: bestMatch.row.c[7]?.v
     };
   }
 
@@ -102,7 +102,7 @@ export const checkAndCopyTrainingData = async () => {
     const data = JSON.parse(jsonString);
     
     const completedRows = data.table.rows.filter((row: any) => 
-      row.c[9]?.v === 'done' // Column J has 'done'
+      row.c[9]?.v === 'done'
     );
     
     console.log('Found completed rows:', completedRows.length);
@@ -111,11 +111,14 @@ export const checkAndCopyTrainingData = async () => {
       const formData = new FormData();
       formData.append('completed_rows', JSON.stringify(completedRows));
       
-      const response = await fetch(
-        'https://script.google.com/macros/s/AKfycbzUHODGn9kJ9YjO5H9TsFYZV9ZzQEv8sweQD8v-PA/exec',
+      await fetch(
+        'https://script.google.com/macros/s/AKfycbwV8sweQD8v-PA/exec',
         {
           method: 'POST',
-          mode: 'no-cors', // 添加這行來處理 CORS
+          mode: 'no-cors',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
           body: formData
         }
       );
