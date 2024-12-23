@@ -107,7 +107,7 @@ export const checkAndCopyTrainingData = async () => {
       
       // 將完整的列資料（B到J欄）傳送到 Apps Script
       const rowsToSend = completedRows.map((row: any) => ({
-        c: row.c.slice(1, 10) // 只取 B 到 J 欄的資料（index 1-9）
+        c: row.c.slice(1, 10).map(cell => cell ? cell.v : '') // 轉換成純值陣列
       }));
       
       formData.append('completed_rows', JSON.stringify(rowsToSend));
