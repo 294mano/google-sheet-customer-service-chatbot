@@ -95,25 +95,39 @@ export const checkAndCopyTrainingData = async () => {
     const jsonString = text.substring(47).slice(0, -2);
     const data = JSON.parse(jsonString);
     
+    // 找出 J 欄（index 9）標記為 'done' 的列
     const completedRows = data.table.rows.filter((row: any) => 
-      row.c[9]?.v === 'done'
+      row.c && row.c[9] && row.c[9].v === 'done'
     );
     
     console.log('Found completed rows:', completedRows.length);
     
     if (completedRows.length > 0) {
       const formData = new FormData();
-      formData.append('completed_rows', JSON.stringify(completedRows));
       
-      await fetch(APPS_SCRIPT_URL, {
+      // 將完整的列資料（B到J欄）傳送到 Apps Script
+      const rowsToSend = completedRows.map((row: any) => ({
+        c: row.c.slice(1, 10) // 只取 B 到 J 欄的資料（index 1-9）
+      }));
+      
+      formData.append('completed_rows', JSON.stringify(rowsToSend));
+      formData.append('action', 'copy_to_kbase');
+      
+      console.log('Sending data to Apps Script:', rowsToSend);
+      
+      const copyResponse = await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
         mode: 'no-cors',
         body: formData
       });
       
       console.log('Successfully sent completed training data');
+      return true;
     }
+    
+    return false;
   } catch (error) {
     console.error('Error copying training data:', error);
+    return false;
   }
 };
