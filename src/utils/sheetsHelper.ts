@@ -1,7 +1,7 @@
 const SHEET_ID = '1PlHr1jfajCDJVF-QyFRV8Y4bBIWYj91UjVywZaClUEY';
 const WORKSHEET_NAME = 'k-base';
 const TRAINING_BOT_WORKSHEET = 'training_bot';
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby48-PHZv_l5oDf6onI1a7LDpeGJB6kcqM56cGjptVr3z82deUiTKpjxjVfEb6a4SNd/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyuiDMpTDbBWRISWb-e37yoVOj7hEaaLcgTvBaL-Qt7Yrqiy3xVx22jJ4fdwFHbdmL9/exec';
 
 export const fetchSheetData = async () => {
   try {
@@ -105,15 +105,21 @@ export const checkAndCopyTrainingData = async () => {
     if (completedRows.length > 0) {
       const formData = new FormData();
       
-      // 將完整的列資料（B到J欄）傳送到 Apps Script
-      const rowsToSend = completedRows.map((row: any) => ({
-        c: row.c.slice(1, 10).map(cell => cell ? cell.v : '') // 轉換成純值陣列
-      }));
+      // 將完整的列資料（B到J欄）轉換成純值陣列
+      const rowsToSend = completedRows.map((row: any) => {
+        // 取得 B 到 J 欄的資料（index 1-9），並確保每個儲存格都有值
+        const cells = row.c.slice(1, 10).map((cell: any) => {
+          return cell ? cell.v : ''; // 如果儲存格存在就取值，否則返回空字串
+        });
+        return cells;
+      });
+      
+      console.log('Prepared rows to send:', rowsToSend);
       
       formData.append('completed_rows', JSON.stringify(rowsToSend));
       formData.append('action', 'copy_to_kbase');
       
-      console.log('Sending data to Apps Script:', rowsToSend);
+      console.log('Sending data to Apps Script...');
       
       const copyResponse = await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
