@@ -10,6 +10,10 @@ import { Home } from 'lucide-react';
 interface Message {
   text: string;
   isBot: boolean;
+  urlDetails?: {
+    text: string;
+    url: string;
+  };
 }
 
 const Index = () => {
@@ -39,8 +43,7 @@ const Index = () => {
 
     initChat();
     
-    // Check for completed training data periodically
-    const interval = setInterval(checkAndCopyTrainingData, 300000); // Every 5 minutes
+    const interval = setInterval(checkAndCopyTrainingData, 300000);
     return () => clearInterval(interval);
   }, []);
 
@@ -52,12 +55,15 @@ const Index = () => {
       setMessages(prev => [
         ...prev,
         { 
-          text: `${answer.answer}\n${answer.details}`,
-          isBot: true 
+          text: answer.answer,
+          isBot: true,
+          urlDetails: answer.details ? {
+            text: "訪視資料",
+            url: answer.details
+          } : undefined
         }
       ]);
     } else {
-      // Save unanswered question to training_bot sheet
       await saveUnansweredQuestion(text);
       
       setMessages(prev => [
@@ -92,6 +98,7 @@ const Index = () => {
               key={index}
               message={message.text}
               isBot={message.isBot}
+              urlDetails={message.urlDetails}
             />
           ))}
         </div>
