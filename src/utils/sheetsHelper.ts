@@ -97,7 +97,7 @@ export const checkAndCopyTrainingData = async () => {
     
     // 找出 J 欄（index 9）標記為 'done' 的列
     const completedRows = data.table.rows.filter((row: any) => 
-      row.c && row.c[9] && row.c[9].v === 'done'
+      row.c && row.c[9] && row.c[9].v.trim().toLowerCase() === 'done'
     );
     
     console.log('Found completed rows:', completedRows.length);
@@ -114,10 +114,11 @@ export const checkAndCopyTrainingData = async () => {
         return cells;
       });
       
-      console.log('Prepared rows to send:', rowsToSend);
+      console.log('Prepared rows to send:', JSON.stringify(rowsToSend, null, 2));
       
       formData.append('completed_rows', JSON.stringify(rowsToSend));
       formData.append('action', 'copy_to_kbase');
+      formData.append('sheet_name', 'k-base'); // 明確指定目標工作表
       
       console.log('Sending data to Apps Script...');
       
